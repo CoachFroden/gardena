@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#173e2f" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Rolfen" />
+  <meta name="description" content="Rolfen – full kontroll over robotklipperen fra iPhone." />
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="/icon.svg" />
+  <link rel="stylesheet" href="/styles.css" />
+  <title>Rolfen</title>
+</head>
+<body>
+  <div class="app" id="app">
+    <header class="topbar">
+      <div class="brand">
+        <img class="brand-icon" src="/icon.svg" alt="" />
+        <div>
+          <span class="eyebrow">SILENO MINIMO</span>
+          <h1>Rolfen</h1>
+        </div>
+      </div>
+      <button class="icon-button" id="refreshBtn" aria-label="Oppdater">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.34 5.66M20 4v7h-7"/></svg>
+      </button>
+    </header>
+
+    <main>
+      <section class="hero glass">
+        <div class="hero-copy">
+          <div class="live-row">
+            <span class="live-dot"></span>
+            <span id="connectionText">Kobler til Home Assistant…</span>
+          </div>
+          <h2 id="heroState">Rolfen våkner…</h2>
+          <p id="heroActivity">Henter status, plan og sensorer.</p>
+
+          <div class="quick-actions">
+            <button class="primary action" data-mower-action="start_mowing">
+              <span class="action-icon">▶</span><span>Start</span>
+            </button>
+            <button class="secondary action" data-mower-action="pause">
+              <span class="action-icon">Ⅱ</span><span>Pause</span>
+            </button>
+            <button class="secondary action" data-mower-action="dock">
+              <span class="action-icon">⌂</span><span>Parkér</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="mower-stage" aria-hidden="true">
+          <div class="buddleja buddleja-left"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="buddleja buddleja-right"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="butterfly butterfly-one"><span></span><span></span></div>
+          <div class="butterfly butterfly-two"><span></span><span></span></div>
+          <div class="mower">
+            <div class="mower-top"></div>
+            <div class="mower-led"></div>
+            <div class="mower-wheel left"></div>
+            <div class="mower-wheel right"></div>
+          </div>
+          <div class="grass"></div>
+        </div>
+
+        <div class="battery-orbit">
+          <svg class="battery-ring" viewBox="0 0 120 120">
+            <circle class="ring-bg" cx="60" cy="60" r="51"></circle>
+            <circle class="ring-value" id="batteryRing" cx="60" cy="60" r="51"></circle>
+          </svg>
+          <div class="battery-value"><strong id="batteryValue">--</strong><span>%</span></div>
+        </div>
+      </section>
+
+      <nav class="tabs" aria-label="Rolfen seksjoner">
+        <button class="tab active" data-tab="overview">Oversikt</button>
+        <button class="tab" data-tab="control">Kontroll</button>
+        <button class="tab" data-tab="diagnostics">Diagnostikk</button>
+        <button class="tab" data-tab="schedule">Plan</button>
+      </nav>
+
+      <section class="tab-panel active" id="overview">
+        <div class="status-grid" id="statusGrid"></div>
+        <div class="glass section-card">
+          <div class="section-heading">
+            <div>
+              <span class="eyebrow">HURTIGKONTROLL</span>
+              <h3>Det viktigste akkurat nå</h3>
+            </div>
+          </div>
+          <div class="entity-grid compact" id="quickEntityGrid"></div>
+        </div>
+      </section>
+
+      <section class="tab-panel" id="control">
+        <div class="glass section-card">
+          <div class="section-heading">
+            <div>
+              <span class="eyebrow">FULL KONTROLL</span>
+              <h3>Alle tilgjengelige innstillinger</h3>
+            </div>
+            <span class="count-pill" id="controlCount">0</span>
+          </div>
+          <div class="entity-grid" id="controlGrid"></div>
+        </div>
+      </section>
+
+      <section class="tab-panel" id="diagnostics">
+        <div class="glass section-card">
+          <div class="section-heading">
+            <div>
+              <span class="eyebrow">HELSE & DATA</span>
+              <h3>Sensorer og diagnostikk</h3>
+            </div>
+            <button class="mini-button" id="diagnosticRefresh">Oppdater klipper</button>
+          </div>
+          <div class="sensor-list" id="diagnosticsList"></div>
+        </div>
+      </section>
+
+      <section class="tab-panel" id="schedule">
+        <div class="glass section-card">
+          <div class="section-heading">
+            <div>
+              <span class="eyebrow">UKEPLAN</span>
+              <h3>Klippetider</h3>
+            </div>
+          </div>
+          <div id="scheduleContent" class="schedule-empty">
+            <div class="schedule-icon">◷</div>
+            <h4>Ser etter Rolfens kalender…</h4>
+            <p>Når Gardena-integrasjonen eksponerer en kalender, vises den her.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="setup glass hidden" id="setupPanel">
+        <span class="eyebrow">OPPSETT</span>
+        <h3>Home Assistant er ikke koblet til ennå</h3>
+        <p>Appen trenger to Vercel-miljøvariabler: <code>HA_URL</code> og <code>HA_TOKEN</code>. Tokenet blir kun brukt på serveren og sendes aldri til iPhone.</p>
+        <details>
+          <summary>Vis oppsett</summary>
+          <ol>
+            <li>Lag et Long-Lived Access Token i Home Assistant-profilen din.</li>
+            <li>Åpne Vercel → prosjektet → Settings → Environment Variables.</li>
+            <li>Legg inn <code>HA_URL</code> og <code>HA_TOKEN</code>.</li>
+            <li>Redeploy prosjektet.</li>
+          </ol>
+        </details>
+      </section>
+    </main>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  </div>
+  <script src="/app.js" defer></script>
+</body>
+</html>
