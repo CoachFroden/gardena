@@ -1,5 +1,5 @@
-const CACHE = "rolfen-v7";
-const STATIC = ["/", "/index.html", "/styles.css", "/app.js", "/icon.svg?v=7", "/rolfen-ios-20260918-1707.png", "/manifest.webmanifest"];
+const CACHE = "rolfen-v8";
+const STATIC = ["/", "/index.html", "/styles.css", "/app.js", "/icon.svg?v=8", "/rolfen-ios-valid-v8.png", "/manifest.webmanifest"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(STATIC)));
