@@ -376,3 +376,17 @@ body.auth-open { overflow: hidden; }
   .auth-submit { min-height:49px; }
   .bloom-one { left:15px; }.bloom-two { right:15px; }
 }
+
+
+/* Tydelig feilmelding når klipperen rapporterer aktiv feilkode */
+.hero.has-error {
+  box-shadow: 0 28px 70px rgba(120,39,39,.28), inset 0 0 0 2px rgba(255,157,140,.32);
+}
+.hero.has-error .live-dot {
+  background: #ff9d8c;
+  box-shadow: 0 0 0 5px rgba(255,157,140,.14);
+}
+.hero.has-error #heroActivity {
+  color: #ffe3dc;
+  font-weight: 750;
+}

@@ -169,7 +169,8 @@ const state = {
   diagnostics: [],
   calendar: null,
   busy: false,
-  authenticated: false
+  authenticated: false,
+  lastNotifiedError: null
 };
 
 const $ = (selector, root = document) => root.querySelector(selector);
@@ -355,12 +356,27 @@ function renderHero() {
   const battery = findEntity(["battery level", "batteri"], "sensor");
   const activity = findEntity(["activity", "aktivitet"], "sensor");
   const mowerState = state.mower?.state || findEntity(["state"], "sensor")?.state || "ukjent";
+  const mowerError = currentMowerError();
   const activityText = activity?.state && !["none", "unknown", "unavailable"].includes(activity.state)
     ? humanize(activity.state)
     : statusSentence(mowerState);
 
-  $("#heroState").textContent = heroTitle(mowerState);
-  $("#heroActivity").textContent = activityText;
+  const hero = $(".hero");
+  hero?.classList.toggle("has-error", mowerError.active);
+
+  if (mowerError.active) {
+    $("#heroState").textContent = "Rolfen har stoppet";
+    $("#heroActivity").textContent = `Feil: ${mowerError.description}${mowerError.code != null ? ` (kode ${mowerError.code})` : ""}`;
+    const errorKey = `${mowerError.code ?? ""}:${mowerError.description}`;
+    if (state.lastNotifiedError !== errorKey) {
+      state.lastNotifiedError = errorKey;
+      showToast(`Rolfen: ${mowerError.description}`, true);
+    }
+  } else {
+    $("#heroState").textContent = heroTitle(mowerState);
+    $("#heroActivity").textContent = activityText;
+    state.lastNotifiedError = null;
+  }
 
   const batteryNumber = clampNumber(parseFloat(battery?.state), 0, 100);
   $("#batteryValue").textContent = Number.isFinite(batteryNumber) ? Math.round(batteryNumber) : "--";
@@ -374,7 +390,13 @@ function renderHero() {
 }
 
 function renderStatus() {
-  const items = [
+  const mowerError = currentMowerError();
+  const items = mowerError.active ? [
+    ["Batteri", findEntity(["battery level", "batteri"], "sensor"), "%"],
+    ["Status", findEntity(["state"], "sensor") || state.mower, ""],
+    ["Aktivitet", findEntity(["activity", "aktivitet"], "sensor"), ""],
+    ["Feil", findEntity(["error description", "feilbeskrivelse"], "sensor") || findEntity(["error code", "feilkode"], "sensor"), ""]
+  ] : [
     ["Batteri", findEntity(["battery level", "batteri"], "sensor"), "%"],
     ["Status", findEntity(["state"], "sensor") || state.mower, ""],
     ["Modus", findEntity(["mode", "modus"], "sensor"), ""],
@@ -596,6 +618,22 @@ async function callService(domain, service, entityId, data = {}) {
     state.busy = false;
     renderHero();
   }
+}
+
+function currentMowerError() {
+  const codeEntity = findEntity(["error code", "feilkode"], "sensor");
+  const descriptionEntity = findEntity(["error description", "feilbeskrivelse"], "sensor");
+  const code = codeEntity ? Number(codeEntity.state) : null;
+  const rawDescription = descriptionEntity?.state;
+  const description = rawDescription && !["unknown", "unavailable", "none", "no error"].includes(String(rawDescription).toLowerCase())
+    ? translateValue(rawDescription)
+    : "";
+
+  return {
+    active: (Number.isFinite(code) && code > 0) || Boolean(description),
+    code: Number.isFinite(code) ? code : null,
+    description: description || (Number.isFinite(code) && code > 0 ? "Klipperen rapporterer en feil" : "")
+  };
 }
 
 function findEntity(needles, domain) {
