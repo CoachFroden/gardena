@@ -241,15 +241,71 @@ button { cursor: pointer; }
 
 @media (max-width: 520px) {
   .app { padding-left:10px; padding-right:10px; }
-  .hero { min-height: 445px; border-radius:28px; padding:21px 18px; }
-  .hero h2 { max-width:80%; font-size:2.35rem; }
-  .hero p { max-width:78%; font-size:.92rem; }
-  .quick-actions { position:absolute; z-index:12; left:18px; right:18px; bottom:16px; display:grid; grid-template-columns:1.2fr 1fr 1fr; margin:0; }
-  .action { padding:0 10px; min-height:47px; border-radius:15px; }
-  .mower-stage { width:86%; height:63%; right:-14%; bottom:35px; }
-  .mower { right:20%; bottom:5%; transform:scale(.77) perspective(600px) rotateX(8deg) rotateZ(-3deg); }
-  .buddleja-left { left:3%; bottom:11%; }.buddleja-right { right:2%; bottom:15%; }
+
+  /* Mobilhero: tekst og knapper får eget område, illustrasjonen ligger under. */
+  .hero {
+    min-height: 610px;
+    border-radius:28px;
+    padding:21px 18px 300px;
+  }
+  .hero-copy { max-width:100%; }
+  .live-row { padding-right:76px; }
+  .hero h2 {
+    max-width:calc(100% - 72px);
+    font-size:2.28rem;
+    line-height:1.01;
+    margin-top:16px;
+  }
+  .hero p {
+    max-width:100%;
+    font-size:.92rem;
+    line-height:1.42;
+    padding-right:8px;
+  }
+
+  /* Viktig: ikke absolutt posisjonert i hero-copy – det var årsaken til overlappingen. */
+  .quick-actions {
+    position:static;
+    z-index:12;
+    display:grid;
+    grid-template-columns:1.18fr 1fr 1fr;
+    gap:8px;
+    margin-top:20px;
+  }
+  .action {
+    min-width:0;
+    padding:0 9px;
+    min-height:47px;
+    border-radius:15px;
+    white-space:nowrap;
+    font-size:.93rem;
+  }
+  .action-icon { font-size:.92rem; }
+
+  .mower-stage {
+    width:100%;
+    height:292px;
+    right:-8%;
+    bottom:0;
+  }
+  .mower {
+    right:18%;
+    bottom:6%;
+    transform:scale(.76) perspective(600px) rotateX(8deg) rotateZ(-3deg);
+  }
+  .buddleja-left { left:5%; bottom:8%; }
+  .buddleja-right { right:1%; bottom:12%; }
+  .butterfly-one { top:13%; right:3%; }
   .butterfly-two { display:none; }
+
+  .battery-orbit {
+    right:13px;
+    top:16px;
+    width:72px;
+    height:72px;
+  }
+  .battery-value strong { font-size:1.2rem; }
+
   .status-grid { gap:8px; }
   .stat-card { padding:13px; border-radius:18px; }
   .tabs { position:sticky; top:calc(4px + var(--safe-top)); z-index:30; box-shadow:0 10px 25px rgba(24,60,43,.08); }
@@ -257,6 +313,14 @@ button { cursor: pointer; }
   .section-card { padding:15px; border-radius:23px; }
   .section-heading { align-items:flex-start; }
   .brand-icon { width:45px;height:45px;border-radius:14px; }
+}
+
+@media (max-width: 370px) {
+  .hero { min-height:630px; padding-left:15px; padding-right:15px; }
+  .hero h2 { font-size:2.05rem; }
+  .quick-actions { grid-template-columns:1fr; }
+  .action { min-height:43px; }
+  .mower-stage { height:270px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
