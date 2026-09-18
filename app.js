@@ -16,11 +16,14 @@ const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
 document.addEventListener("DOMContentLoaded", () => {
   bindStaticUi();
   registerServiceWorker();
-  refresh();
-  window.setInterval(refresh, 15000);
+  bootstrap();
+  window.setInterval(() => {
+    if (state.authenticated) refresh();
+  }, 15000);
 });
 
 function bindStaticUi() {
+  $("#authForm")?.addEventListener("submit", login);
   $("#refreshBtn")?.addEventListener("click", () => refresh(true));
   $("#diagnosticRefresh")?.addEventListener("click", pressDiagnosticRefresh);
 
@@ -36,14 +39,82 @@ function bindStaticUi() {
   });
 }
 
+async function bootstrap() {
+  try {
+    const response = await fetch(`${API}?action=session`, { cache: "no-store" });
+    if (response.ok) {
+      state.authenticated = true;
+      hideAuth();
+      await refresh();
+      return;
+    }
+  } catch {}
+  showAuth();
+}
+
+async function login(event) {
+  event.preventDefault();
+  const input = $("#appPin");
+  const error = $("#authError");
+  const pin = input?.value?.trim();
+  if (!pin) return;
+
+  error.textContent = "";
+  const submit = $(".auth-submit");
+  if (submit) {
+    submit.disabled = true;
+    submit.textContent = "Låser opp…";
+  }
+
+  try {
+    const response = await fetch(API, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "login", app_pin: pin })
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(result.error || "Feil kode");
+
+    state.authenticated = true;
+    input.value = "";
+    hideAuth();
+    await refresh(true);
+  } catch (err) {
+    error.textContent = err.message || "Kunne ikke logge inn.";
+    input?.focus();
+  } finally {
+    if (submit) {
+      submit.disabled = false;
+      submit.textContent = "Åpne Rolfen";
+    }
+  }
+}
+
+function showAuth() {
+  state.authenticated = false;
+  $("#authScreen")?.classList.remove("hidden");
+  document.body.classList.add("auth-open");
+  window.setTimeout(() => $("#appPin")?.focus(), 80);
+}
+
+function hideAuth() {
+  $("#authScreen")?.classList.add("hidden");
+  document.body.classList.remove("auth-open");
+}
+
 async function refresh(manual = false) {
   try {
     if (manual) spinRefresh(true);
     const response = await fetch(`${API}?action=states`, { cache: "no-store" });
 
+    if (response.status === 401) {
+      showAuth();
+      return;
+    }
+
     if (response.status === 503) {
       $("#setupPanel")?.classList.remove("hidden");
-      setConnection(false, "Home Assistant må konfigureres");
+      setConnection(false, "Serveroppsettet må fullføres");
       return;
     }
 
@@ -348,6 +419,10 @@ async function callService(domain, service, entityId, data = {}) {
     });
 
     const result = await response.json().catch(() => ({}));
+    if (response.status === 401) {
+      showAuth();
+      throw new Error("Sesjonen er utløpt. Logg inn igjen.");
+    }
     if (!response.ok) throw new Error(result.error || `${domain}.${service} feilet`);
 
     showToast(serviceMessage(service));

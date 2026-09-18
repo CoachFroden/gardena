@@ -10,12 +10,35 @@
   <meta name="description" content="Rolfen – full kontroll over robotklipperen fra iPhone." />
   <link rel="manifest" href="/manifest.webmanifest" />
   <link rel="icon" href="/icon.svg" type="image/svg+xml" />
-  <link rel="apple-touch-icon" href="/icon.svg" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/icon-180.png" />
   <link rel="stylesheet" href="/styles.css" />
   <title>Rolfen</title>
 </head>
 <body>
   <div class="app" id="app">
+    <section class="auth-screen hidden" id="authScreen" aria-labelledby="authTitle">
+      <div class="auth-ambient auth-ambient-one"></div>
+      <div class="auth-ambient auth-ambient-two"></div>
+      <div class="auth-card glass">
+        <div class="auth-scene" aria-hidden="true">
+          <img src="/icon.svg" class="auth-icon" alt="" />
+          <div class="auth-bloom bloom-one"></div>
+          <div class="auth-bloom bloom-two"></div>
+        </div>
+        <span class="eyebrow">PRIVAT HAGEKONTROLL</span>
+        <h2 id="authTitle">Hei, jeg er Rolfen.</h2>
+        <p>Logg inn for å styre klipperen, planen og alle Gardena-funksjonene.</p>
+        <form id="authForm" class="auth-form">
+          <label for="appPin">App-kode</label>
+          <div class="auth-input-wrap">
+            <input id="appPin" name="appPin" type="password" inputmode="numeric" autocomplete="current-password" placeholder="••••" required />
+            <button type="submit" class="auth-submit">Åpne Rolfen</button>
+          </div>
+          <div class="auth-error" id="authError" role="alert"></div>
+        </form>
+        <div class="auth-note">Koden lagres ikke i nettleseren. iPhone får en sikker, tidsbegrenset sesjon.</div>
+      </div>
+    </section>
     <header class="topbar">
       <div class="brand">
         <img class="brand-icon" src="/icon.svg" alt="" />
