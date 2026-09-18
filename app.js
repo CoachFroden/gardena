@@ -1,5 +1,166 @@
 const API = "/api/ha";
 const MATCH_TERMS = ["rolfen", "gardena", "sileno"];
+
+const ENTITY_NAME_NO = {
+  "Battery Level": "Batterinivå",
+  "Activity": "Aktivitet",
+  "State": "Status",
+  "Mode": "Modus",
+  "Next Start Time": "Neste start",
+  "Remaining Charging Time": "Gjenstående ladetid",
+  "Battery Voltage": "Batterispenning",
+  "Battery Current": "Batteristrøm",
+  "Battery Temperature": "Batteritemperatur",
+  "Error Code": "Feilkode",
+  "Error Description": "Feilbeskrivelse",
+  "Number Of Messages": "Antall meldinger",
+  "Operator State": "Operatørstatus",
+  "Spot Cutting": "Punktklipping",
+  "Charging Station Mowing Share": "Klippeandel fra ladestasjon",
+  "Last Message": "Siste melding",
+  "Model": "Modell",
+  "Mower Name": "Klippernavn",
+  "Serial Number": "Serienummer",
+  "Hardware Serial Number": "Serienummer maskinvare",
+  "Hardware Revision": "Maskinvarerevisjon",
+  "Production Time": "Produksjonstidspunkt",
+  "Node IPR ID": "Node IPR-ID",
+  "Husqvarna ID": "Husqvarna-ID",
+  "Boot Software Version": "Oppstartsprogramvare",
+  "Application Software Version": "Programvareversjon",
+  "Sub Software Version": "Underprogramvare",
+  "Software Package Version": "Programvarepakke",
+  "Pitch": "Helning",
+  "Roll": "Sidehelning",
+  "Mower Temperature": "Klippertemperatur",
+  "Orientation Pitch": "Retningshelning",
+  "Orientation Roll": "Retnings-sidehelning",
+  "Signal Quality": "Signalkvalitet",
+  "Loop Signal Strength": "Sløyfesignalkvalitet",
+  "A0 Signal": "A0-signal",
+  "F Signal": "F-signal",
+  "N Signal": "N-signal",
+  "Message From Charging Station": "Melding fra ladestasjon",
+  "Supported Accessories": "Støttet tilbehør",
+  "Total Running Time": "Total driftstid",
+  "Total Cutting Time": "Total klippetid",
+  "Total Charging Time": "Total ladetid",
+  "Total Searching Time": "Total søketid",
+  "Cutting Blade Usage Time": "Brukstid knivblad",
+  "Number Of Collisions": "Antall kollisjoner",
+  "Number Of Charging Cycles": "Antall ladesykluser",
+  "Collision": "Kollisjon",
+  "Lift": "Løftet",
+  "Upside Down": "Opp-ned",
+  "In Charging Station": "I ladestasjon",
+  "Frost Sensor Enabled": "Frostsensor aktiv",
+  "Garage Supported": "Garasje støttet",
+  "ZoneProtect Supported": "ZoneProtect støttet",
+  "Anti-collision Radar Available": "Antikollisjonsradar tilgjengelig",
+  "Spot Cut": "Punktklipping",
+  "Park Until Further Notice": "Parkér inntil videre",
+  "SensorControl": "SensorControl",
+  "Frost Sensor": "Frostsensor",
+  "Avoid Garage": "Unngå garasje",
+  "Anti-collision Radar": "Antikollisjonsradar",
+  "Eco Mode": "Økomodus",
+  "Manual Mowing Duration": "Manuell klippetid",
+  "Drive Past Wire": "Kjør forbi begrensningskabel",
+  "Charging Station Starting Point Distance": "Startavstand fra ladestasjon",
+  "SensorControl Sensitivity": "SensorControl-følsomhet",
+  "Diagnostic Refresh": "Oppdater diagnostikk",
+  "Generate Loop Signal": "Generer sløyfesignal",
+  "Reset Cutting Blade Usage Time": "Nullstill brukstid for knivblad",
+  "Schedule": "Klippeplan"
+};
+
+const DOMAIN_NO = {
+  switch: "Bryter",
+  number: "Verdi",
+  select: "Valg",
+  button: "Handling",
+  sensor: "Sensor",
+  binary_sensor: "Sensor",
+  calendar: "Kalender",
+  lawn_mower: "Robotklipper"
+};
+
+const VALUE_NO = {
+  none: "Ingen aktivitet",
+  stopped: "Stoppet",
+  mowing: "Klipper",
+  cutting: "Klipper",
+  charging: "Lader",
+  docked: "Parkert",
+  parked: "Parkert",
+  paused: "Pauset",
+  error: "Feil",
+  auto: "Automatisk",
+  automatic: "Automatisk",
+  manual: "Manuell",
+  on: "På",
+  off: "Av",
+  true: "Ja",
+  false: "Nei",
+  active: "Aktiv",
+  inactive: "Ikke aktiv",
+  not_active: "Ikke aktiv",
+  idle: "Venter",
+  pending_start: "Venter på start",
+  running: "Kjører",
+  unknown: "Ukjent",
+  unavailable: "Utilgjengelig",
+  low: "Lav",
+  medium: "Middels",
+  high: "Høy",
+  "right boundary wire": "Høyre begrensningskabel",
+  "left boundary wire": "Venstre begrensningskabel",
+  "guide wire 1": "Guidekabel 1",
+  "guide wire 2": "Guidekabel 2",
+  "guide wire 3": "Guidekabel 3",
+  "no error": "Ingen feil"
+};
+
+function translateEntityName(name) {
+  const direct = ENTITY_NAME_NO[name];
+  if (direct) return direct;
+
+  let match = name.match(/^Starting Point (\d+) Distance$/i);
+  if (match) return `Startpunkt ${match[1]} – avstand`;
+
+  match = name.match(/^Starting Point (\d+) Mowing Share$/i);
+  if (match) return `Startpunkt ${match[1]} – klippeandel`;
+
+  match = name.match(/^Starting Point (\d+) CorridorCut$/i);
+  if (match) return `Startpunkt ${match[1]} – korridorklipp`;
+
+  match = name.match(/^Starting Point (\d+) Wire$/i);
+  if (match) return `Startpunkt ${match[1]} – kabel`;
+
+  match = name.match(/^Starting Point (\d+)$/i);
+  if (match) return `Startpunkt ${match[1]}`;
+
+  match = name.match(/^Guide (\d+) Signal$/i);
+  if (match) return `Guidekabel ${match[1]} – signal`;
+
+  return name;
+}
+
+function translateValue(value) {
+  const text = String(value ?? "");
+  const key = text.toLowerCase();
+  if (VALUE_NO[key]) return VALUE_NO[key];
+
+  const unknownError = text.match(/^Unknown error \((\d+)\)$/i);
+  if (unknownError) return `Ukjent feil (${unknownError[1]})`;
+
+  return text.replaceAll("_", " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
+function translateOption(value) {
+  return translateValue(value);
+}
+
 const state = {
   all: [],
   mower: null,
@@ -298,7 +459,7 @@ function entityCard(entity) {
     const options = Array.isArray(entity.attributes?.options) ? entity.attributes.options : [];
     control = `
       <select class="select-control" data-select="${id}">
-        ${options.map((option) => `<option value="${escapeAttr(option)}" ${String(option) === entity.state ? "selected" : ""}>${escapeHtml(option)}</option>`).join("")}
+        ${options.map((option) => `<option value="${escapeAttr(option)}" ${String(option) === entity.state ? "selected" : ""}>${escapeHtml(translateOption(option))}</option>`).join("")}
       </select>`;
   }
 
@@ -311,7 +472,7 @@ function entityCard(entity) {
       <div class="entity-head">
         <div>
           <div class="entity-title">${name}</div>
-          <div class="entity-domain">${escapeHtml(domain)}</div>
+          <div class="entity-domain">${escapeHtml(DOMAIN_NO[domain] || domain)}</div>
         </div>
         ${domain === "switch" ? control : ""}
       </div>
@@ -389,7 +550,8 @@ async function renderSchedule() {
     container.innerHTML = events.map((event) => {
       const startText = formatDateTime(event.start?.dateTime || event.start?.date);
       const endText = formatDateTime(event.end?.dateTime || event.end?.date);
-      return `<div class="calendar-card"><strong>${escapeHtml(event.summary || "Klippeøkt")}</strong><span>${escapeHtml(startText)} – ${escapeHtml(endText)}</span></div>`;
+      const summary = String(event.summary || "").toLowerCase() === "mowing schedule" ? "Klippeøkt" : (event.summary || "Klippeøkt");
+      return `<div class="calendar-card"><strong>${escapeHtml(summary)}</strong><span>${escapeHtml(startText)} – ${escapeHtml(endText)}</span></div>`;
     }).join('<div style="height:8px"></div>');
   } catch {
     container.innerHTML = `<div class="calendar-card"><strong>${escapeHtml(cleanName(state.calendar))}</strong><span>Kalenderen finnes, men hendelser kunne ikke hentes akkurat nå.</span></div>`;
@@ -397,13 +559,13 @@ async function renderSchedule() {
 }
 
 async function mowerAction(service) {
-  if (!state.mower) return showToast("Fant ikke lawn_mower-entiteten for Rolfen.", true);
+  if (!state.mower) return showToast("Fant ikke robotklipper-entiteten for Rolfen.", true);
   await callService("lawn_mower", service, state.mower.entity_id);
 }
 
 async function pressDiagnosticRefresh() {
   const button = state.controls.find((entity) => domainOf(entity) === "button" && entityText(entity).includes("diagnostic refresh"));
-  if (!button) return showToast("Diagnostic Refresh er ikke tilgjengelig på Rolfen.", true);
+  if (!button) return showToast("Oppdater diagnostikk er ikke tilgjengelig på Rolfen.", true);
   await callService("button", "press", button.entity_id);
 }
 
@@ -464,19 +626,34 @@ function cleanName(entity) {
     .replace(/^SILENO Minimo\s*/i, "")
     .trim();
 
-  return name || friendly(entity);
+  name = name || friendly(entity);
+  return translateEntityName(name);
 }
 
 function formatState(entity, forcedSuffix = "") {
   if (!entity) return "—";
-  if (["unknown", "unavailable", "none"].includes(String(entity.state).toLowerCase())) return humanize(entity.state);
+  const raw = String(entity.state);
+
+  if (entity.attributes?.device_class === "timestamp") {
+    const date = new Date(raw);
+    if (!Number.isNaN(date.getTime())) {
+      return new Intl.DateTimeFormat("nb-NO", {
+        weekday: "short",
+        day: "2-digit",
+        month: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit"
+      }).format(date);
+    }
+  }
+
+  if (["unknown", "unavailable", "none"].includes(raw.toLowerCase())) return translateValue(raw);
 
   const unit = forcedSuffix || entity.attributes?.unit_of_measurement || "";
-  const raw = String(entity.state);
-  if (!unit) return humanize(raw);
+  if (!unit) return translateValue(raw);
 
   const numeric = Number(raw);
-  const rendered = Number.isFinite(numeric) ? trimNumber(numeric) : humanize(raw);
+  const rendered = Number.isFinite(numeric) ? trimNumber(numeric) : translateValue(raw);
   return `${rendered}${unit === "%" ? "" : " "}${unit}`;
 }
 
@@ -540,28 +717,7 @@ function showToast(message, error = false) {
 
 function humanize(value) {
   if (value == null || value === "") return "—";
-  const map = {
-    none: "Ingen aktivitet",
-    stopped: "Stoppet",
-    mowing: "Klipper",
-    cutting: "Klipper",
-    charging: "Lader",
-    docked: "Parkert",
-    parked: "Parkert",
-    paused: "Pauset",
-    error: "Feil",
-    auto: "Auto",
-    manual: "Manuell",
-    on: "På",
-    off: "Av",
-    active: "Aktiv",
-    not_active: "Ikke aktiv",
-    unknown: "Ukjent",
-    unavailable: "Utilgjengelig"
-  };
-  const key = String(value).toLowerCase();
-  if (map[key]) return map[key];
-  return String(value).replaceAll("_", " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
+  return translateValue(value);
 }
 
 function formatDateTime(value) {

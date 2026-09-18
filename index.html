@@ -163,13 +163,13 @@
       <section class="setup glass hidden" id="setupPanel">
         <span class="eyebrow">OPPSETT</span>
         <h3>Home Assistant er ikke koblet til ennå</h3>
-        <p>Appen trenger to Vercel-miljøvariabler: <code>HA_URL</code> og <code>HA_TOKEN</code>. Tokenet blir kun brukt på serveren og sendes aldri til iPhone.</p>
+        <p>Appen trenger tre Vercel-miljøvariabler: <code>HA_URL</code>, <code>HA_TOKEN</code> og <code>APP_PIN</code>. Tokenet blir kun brukt på serveren og sendes aldri til iPhone.</p>
         <details>
           <summary>Vis oppsett</summary>
           <ol>
             <li>Lag et Long-Lived Access Token i Home Assistant-profilen din.</li>
             <li>Åpne Vercel → prosjektet → Settings → Environment Variables.</li>
-            <li>Legg inn <code>HA_URL</code> og <code>HA_TOKEN</code>.</li>
+            <li>Legg inn <code>HA_URL</code>, <code>HA_TOKEN</code> og <code>APP_PIN</code>.</li>
             <li>Redeploy prosjektet.</li>
           </ol>
         </details>
