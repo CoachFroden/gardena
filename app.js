@@ -118,7 +118,12 @@ const VALUE_NO = {
   "guide wire 1": "Guidekabel 1",
   "guide wire 2": "Guidekabel 2",
   "guide wire 3": "Guidekabel 3",
-  "no error": "Ingen feil"
+  "no error": "Ingen feil",
+  "going home": "På vei hjem",
+  going_home: "På vei hjem",
+  goinghome: "På vei hjem",
+  searching: "Søker etter ladestasjonen",
+  "searching for charging station": "Søker etter ladestasjonen"
 };
 
 function translateEntityName(name) {
@@ -357,9 +362,11 @@ function renderHero() {
   const activity = findEntity(["activity", "aktivitet"], "sensor");
   const mowerState = state.mower?.state || findEntity(["state"], "sensor")?.state || "ukjent";
   const mowerError = currentMowerError();
-  const activityText = activity?.state && !["none", "unknown", "unavailable"].includes(activity.state)
-    ? humanize(activity.state)
-    : statusSentence(mowerState);
+  const batteryNumber = clampNumber(parseFloat(battery?.state), 0, 100);
+  const rawActivity = String(activity?.state || "").toLowerCase();
+  const hasActivity = rawActivity && !["none", "unknown", "unavailable"].includes(rawActivity);
+  const activityText = hasActivity ? humanize(activity.state) : statusSentence(mowerState);
+  const displayState = hasActivity ? rawActivity : String(mowerState || "").toLowerCase();
 
   const hero = $(".hero");
   hero?.classList.toggle("has-error", mowerError.active);
@@ -373,12 +380,15 @@ function renderHero() {
       showToast(`Rolfen: ${mowerError.description}`, true);
     }
   } else {
-    $("#heroState").textContent = heroTitle(mowerState);
-    $("#heroActivity").textContent = activityText;
+    $("#heroState").textContent = heroTitle(displayState);
+    const batteryLow = Number.isFinite(batteryNumber) && batteryNumber <= 15;
+    $("#heroActivity").textContent =
+      (displayState.includes("going home") || displayState.includes("going_home") || displayState.includes("search"))
+        ? (batteryLow ? `På vei til ladestasjonen – lavt batteri (${Math.round(batteryNumber)} %).` : activityText)
+        : activityText;
     state.lastNotifiedError = null;
   }
 
-  const batteryNumber = clampNumber(parseFloat(battery?.state), 0, 100);
   $("#batteryValue").textContent = Number.isFinite(batteryNumber) ? Math.round(batteryNumber) : "--";
   const circumference = 320.44;
   const percent = Number.isFinite(batteryNumber) ? batteryNumber : 0;
@@ -697,6 +707,7 @@ function formatState(entity, forcedSuffix = "") {
 
 function heroTitle(value) {
   const text = String(value || "").toLowerCase();
+  if (text.includes("going home") || text.includes("going_home") || text.includes("search")) return "Rolfen er på vei hjem";
   if (text.includes("mow") || text.includes("cut")) return "Rolfen er ute på jobb";
   if (text.includes("charg")) return "Rolfen lader opp";
   if (text.includes("dock") || text.includes("park")) return "Rolfen er parkert";
