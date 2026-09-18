@@ -360,16 +360,25 @@ function renderAll() {
 function renderHero() {
   const battery = findEntity(["battery level", "batteri"], "sensor");
   const activity = findEntity(["activity", "aktivitet"], "sensor");
-  const mowerState = state.mower?.state || findEntity(["state"], "sensor")?.state || "ukjent";
+  const detailedStateEntity = findEntity(["state", "status"], "sensor");
+  const detailedState = String(detailedStateEntity?.state || "").toLowerCase();
+  const mowerState = detailedState || String(state.mower?.state || "ukjent").toLowerCase();
   const mowerError = currentMowerError();
   const batteryNumber = clampNumber(parseFloat(battery?.state), 0, 100);
   const rawActivity = String(activity?.state || "").toLowerCase();
   const hasActivity = rawActivity && !["none", "unknown", "unavailable"].includes(rawActivity);
   const activityText = hasActivity ? humanize(activity.state) : statusSentence(mowerState);
-  const displayState = hasActivity ? rawActivity : String(mowerState || "").toLowerCase();
+  const isStopped = ["stopped", "stop", "paused"].includes(detailedState);
+  const wasTryingToMove =
+    rawActivity.includes("going home") ||
+    rawActivity.includes("going_home") ||
+    rawActivity.includes("search") ||
+    rawActivity.includes("mow") ||
+    rawActivity.includes("cut");
 
   const hero = $(".hero");
-  hero?.classList.toggle("has-error", mowerError.active);
+  const abnormalStop = isStopped && wasTryingToMove;
+  hero?.classList.toggle("has-error", mowerError.active || abnormalStop);
 
   if (mowerError.active) {
     $("#heroState").textContent = "Rolfen har stoppet";
@@ -379,7 +388,25 @@ function renderHero() {
       state.lastNotifiedError = errorKey;
       showToast(`Rolfen: ${mowerError.description}`, true);
     }
+  } else if (abnormalStop) {
+    $("#heroState").textContent = "Rolfen har stoppet";
+    $("#heroActivity").textContent =
+      rawActivity.includes("home") || rawActivity.includes("search")
+        ? "Han skulle være på vei til ladestasjonen, men klipperen rapporterer at den står stoppet."
+        : "Klipperen rapporterer at den står stoppet.";
+    const stopKey = `stopped:${rawActivity}`;
+    if (state.lastNotifiedError !== stopKey) {
+      state.lastNotifiedError = stopKey;
+      showToast("Rolfen har stoppet", true);
+    }
+  } else if (isStopped) {
+    $("#heroState").textContent = "Rolfen står stoppet";
+    $("#heroActivity").textContent = Number.isFinite(batteryNumber)
+      ? `Batteri: ${Math.round(batteryNumber)} %.`
+      : "Klipperen står stoppet.";
+    state.lastNotifiedError = null;
   } else {
+    const displayState = hasActivity ? rawActivity : mowerState;
     $("#heroState").textContent = heroTitle(displayState);
     const batteryLow = Number.isFinite(batteryNumber) && batteryNumber <= 15;
     $("#heroActivity").textContent =
@@ -394,7 +421,7 @@ function renderHero() {
   const percent = Number.isFinite(batteryNumber) ? batteryNumber : 0;
   $("#batteryRing").style.strokeDashoffset = String(circumference * (1 - percent / 100));
 
-  $$("[data-mower-action]").forEach((button) => {
+  $("[data-mower-action]").forEach((button) => {
     button.disabled = !state.mower || state.busy;
   });
 }
@@ -403,7 +430,7 @@ function renderStatus() {
   const mowerError = currentMowerError();
   const items = mowerError.active ? [
     ["Batteri", findEntity(["battery level", "batteri"], "sensor"), "%"],
-    ["Status", findEntity(["state"], "sensor") || state.mower, ""],
+    ["Status", findEntity(["state", "status"], "sensor") || state.mower, ""],
     ["Aktivitet", findEntity(["activity", "aktivitet"], "sensor"), ""],
     ["Feil", findEntity(["error description", "feilbeskrivelse"], "sensor") || findEntity(["error code", "feilkode"], "sensor"), ""]
   ] : [
