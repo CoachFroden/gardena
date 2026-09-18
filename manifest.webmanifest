@@ -3,14 +3,24 @@
   "short_name": "Rolfen",
   "description": "Privat kontrollapp for Gardena SILENO minimo via Home Assistant.",
   "lang": "nb-NO",
-  "start_url": "/",
+  "start_url": "/?pwa=7",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
   "background_color": "#eef3e8",
   "theme_color": "#173e2f",
   "icons": [
-    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" },
-    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png", "purpose": "any" }
+    {
+      "src": "/rolfen-ios-20260918-1707.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon.svg?v=7",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
   ]
 }
