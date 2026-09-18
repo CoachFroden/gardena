@@ -7,7 +7,8 @@ const state = {
   controls: [],
   diagnostics: [],
   calendar: null,
-  busy: false
+  busy: false,
+  authenticated: false
 };
 
 const $ = (selector, root = document) => root.querySelector(selector);
