@@ -421,7 +421,7 @@ function renderHero() {
   const percent = Number.isFinite(batteryNumber) ? batteryNumber : 0;
   $("#batteryRing").style.strokeDashoffset = String(circumference * (1 - percent / 100));
 
-  $document.querySelectorAll("[data-mower-action]").forEach((button) => {
+  document.querySelectorAll("[data-mower-action]").forEach((button) => {
     button.disabled = !state.mower || state.busy;
   });
 }
