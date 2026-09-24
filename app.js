@@ -195,14 +195,14 @@ function bindStaticUi() {
   $("#refreshBtn")?.addEventListener("click", () => refresh(true));
   $("#diagnosticRefresh")?.addEventListener("click", pressDiagnosticRefresh);
 
-  $(".tab").forEach((button) => {
+  document.querySelectorAll(".tab").forEach((button) => {
     button.addEventListener("click", () => {
-      $(".tab").forEach((tab) => tab.classList.toggle("active", tab === button));
-      $(".tab-panel").forEach((panel) => panel.classList.toggle("active", panel.id === button.dataset.tab));
+      document.querySelectorAll(".tab").forEach((tab) => tab.classList.toggle("active", tab === button));
+      document.querySelectorAll(".tab-panel").forEach((panel) => panel.classList.toggle("active", panel.id === button.dataset.tab));
     });
   });
 
-  $("[data-mower-action]").forEach((button) => {
+  document.querySelectorAll("[data-mower-action]").forEach((button) => {
     button.addEventListener("click", () => mowerAction(button.dataset.mowerAction));
   });
 }
@@ -421,7 +421,7 @@ function renderHero() {
   const percent = Number.isFinite(batteryNumber) ? batteryNumber : 0;
   $("#batteryRing").style.strokeDashoffset = String(circumference * (1 - percent / 100));
 
-  $$("[data-mower-action]").forEach((button) => {
+  $document.querySelectorAll("[data-mower-action]").forEach((button) => {
     button.disabled = !state.mower || state.busy;
   });
 }
@@ -540,14 +540,14 @@ function entityCard(entity) {
 }
 
 function bindEntityControls(root) {
-  $("[data-switch]", root).forEach((button) => {
+  root.querySelectorAll("[data-switch]").forEach((button) => {
     button.addEventListener("click", async () => {
       const service = button.dataset.current === "on" ? "turn_off" : "turn_on";
       await callService("switch", service, button.dataset.switch);
     });
   });
 
-  $("[data-number]", root).forEach((button) => {
+  root.querySelectorAll("[data-number]").forEach((button) => {
     button.addEventListener("click", async () => {
       const min = Number(button.dataset.min);
       const max = Number(button.dataset.max);
@@ -556,11 +556,11 @@ function bindEntityControls(root) {
     });
   });
 
-  $("[data-select]", root).forEach((select) => {
+  root.querySelectorAll("[data-select]").forEach((select) => {
     select.addEventListener("change", () => callService("select", "select_option", select.dataset.select, { option: select.value }));
   });
 
-  $("[data-button]", root).forEach((button) => {
+  root.querySelectorAll("[data-button]").forEach((button) => {
     button.addEventListener("click", () => callService("button", "press", button.dataset.button));
   });
 }
