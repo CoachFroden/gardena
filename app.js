@@ -195,14 +195,14 @@ function bindStaticUi() {
   $("#refreshBtn")?.addEventListener("click", () => refresh(true));
   $("#diagnosticRefresh")?.addEventListener("click", pressDiagnosticRefresh);
 
-  $$$(".tab").forEach((button) => {
+  $(".tab").forEach((button) => {
     button.addEventListener("click", () => {
-      $$$(".tab").forEach((tab) => tab.classList.toggle("active", tab === button));
-      $$$(".tab-panel").forEach((panel) => panel.classList.toggle("active", panel.id === button.dataset.tab));
+      $(".tab").forEach((tab) => tab.classList.toggle("active", tab === button));
+      $(".tab-panel").forEach((panel) => panel.classList.toggle("active", panel.id === button.dataset.tab));
     });
   });
 
-  $$$("[data-mower-action]").forEach((button) => {
+  $("[data-mower-action]").forEach((button) => {
     button.addEventListener("click", () => mowerAction(button.dataset.mowerAction));
   });
 }
@@ -540,14 +540,14 @@ function entityCard(entity) {
 }
 
 function bindEntityControls(root) {
-  $$$("[data-switch]", root).forEach((button) => {
+  $("[data-switch]", root).forEach((button) => {
     button.addEventListener("click", async () => {
       const service = button.dataset.current === "on" ? "turn_off" : "turn_on";
       await callService("switch", service, button.dataset.switch);
     });
   });
 
-  $$$("[data-number]", root).forEach((button) => {
+  $("[data-number]", root).forEach((button) => {
     button.addEventListener("click", async () => {
       const min = Number(button.dataset.min);
       const max = Number(button.dataset.max);
@@ -556,11 +556,11 @@ function bindEntityControls(root) {
     });
   });
 
-  $$$("[data-select]", root).forEach((select) => {
+  $("[data-select]", root).forEach((select) => {
     select.addEventListener("change", () => callService("select", "select_option", select.dataset.select, { option: select.value }));
   });
 
-  $$$("[data-button]", root).forEach((button) => {
+  $("[data-button]", root).forEach((button) => {
     button.addEventListener("click", () => callService("button", "press", button.dataset.button));
   });
 }
