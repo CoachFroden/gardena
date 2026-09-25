@@ -680,7 +680,9 @@ function currentMowerError() {
 
   const reportedError = (Number.isFinite(code) && code > 0) || Boolean(description);
   // Current motion/activity wins over a retained historical Gardena error code.
-  const active = reportedError && activeErrorState && !healthyNow;
+  // A fresh running/healthy status must clear a retained historical error.
+  // If Gardena keeps "restricted" after recovery, live activity still wins.
+  const active = reportedError && !healthyNow && (activeErrorState || !runningNow);
 
   return {
     active,
