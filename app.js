@@ -666,19 +666,21 @@ function currentMowerError() {
     ? translateValue(rawDescription)
     : "";
 
-  // Gardena may retain the previous error code after the mower has recovered.
-  // Only present it as an active error while the mower itself is still in an
-  // error/stopped/restricted state. Fresh activity such as mowing, charging,
-  // returning or parked means the old code is historical/stale.
   const activity = String(findEntity(["activity", "aktivitet"], "sensor")?.state || "").toLowerCase();
   const detailedState = String(findEntity(["state", "status"], "sensor")?.state || "").toLowerCase();
   const mowerState = String(state.mower?.state || "").toLowerCase();
-  const recoveredActivity = ["mowing", "cutting", "charging", "going_home", "going home", "returning", "parked"]
-    .some((value) => activity.includes(value) || mowerState.includes(value));
-  const errorState = ["error", "problem", "stopped", "restricted"]
-    .some((value) => detailedState.includes(value) || mowerState.includes(value));
+
+  const runningNow =
+    ["mowing", "cutting", "in_operation", "in operation"].some(v => activity.includes(v) || detailedState.includes(v) || mowerState.includes(v));
+  const healthyNow =
+    runningNow ||
+    ["charging", "going_home", "going home", "returning", "parked", "docked"].some(v => activity.includes(v) || mowerState.includes(v));
+  const activeErrorState =
+    ["error", "problem", "stopped", "restricted"].some(v => detailedState.includes(v) || mowerState.includes(v));
+
   const reportedError = (Number.isFinite(code) && code > 0) || Boolean(description);
-  const active = reportedError && (errorState || !recoveredActivity);
+  // Current motion/activity wins over a retained historical Gardena error code.
+  const active = reportedError && activeErrorState && !healthyNow;
 
   return {
     active,
@@ -686,7 +688,6 @@ function currentMowerError() {
     description: description || (Number.isFinite(code) && code > 0 ? "Klipperen rapporterer en feil" : "")
   };
 }
-
 function findEntity(needles, domain) {
   const normalized = needles.map((item) => item.toLowerCase());
   return state.related.find((entity) => {
