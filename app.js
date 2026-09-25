@@ -675,14 +675,17 @@ function currentMowerError() {
   const healthyNow =
     runningNow ||
     ["charging", "going_home", "going home", "returning", "parked", "docked"].some(v => activity.includes(v) || mowerState.includes(v));
+  const detailedStopped =
+    ["stopped", "off", "wait_for_safetypin", "wait for safetypin"].some(v => detailedState.includes(v));
   const activeErrorState =
-    ["error", "problem", "stopped", "restricted"].some(v => detailedState.includes(v) || mowerState.includes(v));
+    ["fatal_error", "error", "problem", "restricted"].some(v => detailedState.includes(v));
 
   const reportedError = (Number.isFinite(code) && code > 0) || Boolean(description);
-  // Current motion/activity wins over a retained historical Gardena error code.
-  // A fresh running/healthy status must clear a retained historical error.
-  // If Gardena keeps "restricted" after recovery, live activity still wins.
-  const active = reportedError && !healthyNow && (activeErrorState || !runningNow);
+  // Gardena Mower BLE deliberately maps STOPPED/OFF/WAIT_FOR_SAFETYPIN to the
+  // Home Assistant lawn_mower state "error". The detailed State sensor is
+  // therefore authoritative: a normal stopped state must not be shown as a fault.
+  // Live healthy activity also clears retained historical Gardena error data.
+  const active = reportedError && !detailedStopped && !healthyNow && activeErrorState;
 
   return {
     active,
